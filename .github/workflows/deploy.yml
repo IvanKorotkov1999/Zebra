@@ -1,0 +1,82 @@
+name: Build and deploy
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Lint PHP
+        run: find backend deploy -name '*.php' -not -path 'backend/vendor/*' -print0 | xargs -0 -n1 php -l
+
+      # Everything below runs only for the main branch: that is the release.
+      - name: Write production config
+        if: github.ref == 'refs/heads/main'
+        env:
+          COOKIE_VALIDATION_KEY: ${{ secrets.COOKIE_VALIDATION_KEY }}
+          DB_HOST: ${{ vars.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: php deploy/make-local-config.php
+
+      - name: Protect non-public directories
+        if: github.ref == 'refs/heads/main'
+        working-directory: backend
+        run: |
+          for dir in config controllers runtime vendor; do
+            echo 'Require all denied' > "$dir/.htaccess"
+          done
+          touch runtime/.keep
+
+      - name: Upload to reg.ru
+        if: github.ref == 'refs/heads/main'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
+          local-dir: backend/
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            composer.json
+            composer.lock
+            config/local.example.php
+            runtime/logs/**
+            runtime/cache/**

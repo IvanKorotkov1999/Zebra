@@ -1,0 +1,5 @@
+# Shared hosting: the site directory is the document root, so route
+# every request into web/ and keep the rest of the app unreachable.
+RewriteEngine On
+RewriteCond %{REQUEST_URI} !^/web/
+RewriteRule ^(.*)$ web/$1 [L]
