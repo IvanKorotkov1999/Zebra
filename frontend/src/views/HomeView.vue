@@ -16,7 +16,7 @@ onMounted(async () => {
 
 <template>
   <main>
-    <h1>Zebra</h1>
+    <h1>Avoxe</h1>
     <p v-if="health">Backend: {{ health.status }} · PHP {{ health.php }} · DB: {{ health.db }}</p>
     <p v-else-if="error">Backend недоступен: {{ error }}</p>
     <p v-else>Проверяем backend…</p>

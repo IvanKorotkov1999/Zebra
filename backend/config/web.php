@@ -6,7 +6,7 @@ $localFile = __DIR__ . '/local.php';
 $local = is_file($localFile) ? require $localFile : [];
 
 $config = [
-    'id' => 'zebra',
+    'id' => 'avoxe',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'defaultRoute' => 'site/index',

@@ -1,6 +1,6 @@
 {
-    "name": "zebra/backend",
-    "description": "Zebra site backend (Yii2 API + SPA host)",
+    "name": "avoxe/backend",
+    "description": "Avoxe site backend (Yii2 API + SPA host)",
     "type": "project",
     "license": "proprietary",
     "require": {

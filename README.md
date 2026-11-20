@@ -1,4 +1,4 @@
-# Zebra
+# Avoxe
 
 - `backend/` — PHP, Yii2: API (`/api/*`) и раздача собранного фронтенда.
 - `frontend/` — Vue 3 + TypeScript (Vite), собирается в `backend/web/dist`.

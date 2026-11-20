@@ -4,7 +4,7 @@
 return [
     'cookieValidationKey' => 'put-a-long-random-string-here',
     'db' => [
-        'dsn' => 'mysql:host=localhost;dbname=zebra',
+        'dsn' => 'mysql:host=localhost;dbname=avoxe',
         'username' => 'root',
         'password' => '',
     ],
